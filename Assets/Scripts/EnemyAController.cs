@@ -130,7 +130,6 @@ public class EnemyAController : MonoBehaviour
         SetWalking(false);
         SetAttacking(true);
 
-        // Player tomon qarash
         Vector3 direction = player.position - transform.position;
         direction.y = 0f;
 
@@ -146,7 +145,16 @@ public class EnemyAController : MonoBehaviour
             );
         }
 
-        // Attack cooldown
+        // Player Power Mode'da bo'lsa damage bermaydi
+        PlayerPowerPallet power =
+            player.GetComponent<PlayerPowerPallet>();
+
+        if (power != null && power.IsPoweredUp())
+        {
+            return;
+        }
+
+        // Oddiy attack
         if (Time.time >= nextAttackTime)
         {
             PlayerHealth playerHealth =
