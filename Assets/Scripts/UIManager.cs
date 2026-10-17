@@ -81,6 +81,21 @@ public class UIManager : MonoBehaviour
 
 
     // =========================================================
+    // AUDIO
+    // =========================================================
+
+    [Header("Audio Sources")]
+    [SerializeField] private AudioSource backgroundMusicSource;
+    [SerializeField] private AudioSource soundEffectSource;
+
+
+    [Header("Audio Clips")]
+    [SerializeField] private AudioClip buttonClickSound;
+    [SerializeField] private AudioClip youWinSound;
+    [SerializeField] private AudioClip youDiedSound;
+
+
+    // =========================================================
     // STATE
     // =========================================================
 
@@ -96,10 +111,12 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
 
         UpdateLevelText();
+
         LoadMusicState();
 
-        // Power bar o'yin boshida yashirin
         HidePowerBar();
+
+        StopBackgroundMusic();
 
         ShowMainMenu();
     }
@@ -137,10 +154,12 @@ public class UIManager : MonoBehaviour
         youWinPanel.SetActive(false);
         youDiedPanel.SetActive(false);
 
-        // Har safar game boshlanganda power bar yashirin
         HidePowerBar();
 
         Time.timeScale = 1f;
+
+        // Game boshlanganda music
+        PlayBackgroundMusic();
     }
 
 
@@ -153,6 +172,8 @@ public class UIManager : MonoBehaviour
         youWinPanel.SetActive(false);
         youDiedPanel.SetActive(false);
 
+        StopBackgroundMusic();
+
         Time.timeScale = 0f;
     }
 
@@ -163,6 +184,8 @@ public class UIManager : MonoBehaviour
 
     public void QuitGame()
     {
+        PlayButtonClick();
+
         Debug.Log("Game Quit");
 
         Application.Quit();
@@ -178,8 +201,12 @@ public class UIManager : MonoBehaviour
         if (gameEnded)
             return;
 
+        PlayButtonClick();
+
         gamePanel.SetActive(false);
         pausePanel.SetActive(true);
+
+        StopBackgroundMusic();
 
         Time.timeScale = 0f;
     }
@@ -194,10 +221,14 @@ public class UIManager : MonoBehaviour
         if (gameEnded)
             return;
 
+        PlayButtonClick();
+
         pausePanel.SetActive(false);
         gamePanel.SetActive(true);
 
         Time.timeScale = 1f;
+
+        PlayBackgroundMusic();
     }
 
 
@@ -207,6 +238,8 @@ public class UIManager : MonoBehaviour
 
     public void RestartGame()
     {
+        PlayButtonClick();
+
         Time.timeScale = 1f;
 
         SceneManager.LoadScene(
@@ -221,6 +254,8 @@ public class UIManager : MonoBehaviour
 
     public void NextLevel()
     {
+        PlayButtonClick();
+
         Time.timeScale = 1f;
 
         int nextScene =
@@ -312,14 +347,12 @@ public class UIManager : MonoBehaviour
         float duration =
             playerPowerPallet.GetPowerDuration();
 
-        // Power aktiv emas
         if (!playerPowerPallet.IsPoweredUp())
         {
             HidePowerBar();
             return;
         }
 
-        // Power aktiv
         ShowPowerBar();
 
         if (duration > 0f)
@@ -334,28 +367,20 @@ public class UIManager : MonoBehaviour
 
 
     // =========================================================
-    // SHOW POWER BAR
+    // POWER BAR SHOW / HIDE
     // =========================================================
 
     private void ShowPowerBar()
     {
         if (powerBar != null)
-        {
             powerBar.SetActive(true);
-        }
     }
 
-
-    // =========================================================
-    // HIDE POWER BAR
-    // =========================================================
 
     private void HidePowerBar()
     {
         if (powerBar != null)
-        {
             powerBar.SetActive(false);
-        }
     }
 
 
@@ -383,6 +408,9 @@ public class UIManager : MonoBehaviour
 
     public void ShowWinPanel()
     {
+        if (gameEnded)
+            return;
+
         gameEnded = true;
 
         gamePanel.SetActive(false);
@@ -390,6 +418,11 @@ public class UIManager : MonoBehaviour
         youWinPanel.SetActive(true);
 
         HidePowerBar();
+
+        StopBackgroundMusic();
+
+        // You Win audio - faqat bir marta
+        PlayYouWinSound();
 
         Time.timeScale = 0f;
     }
@@ -416,6 +449,9 @@ public class UIManager : MonoBehaviour
 
     public void ShowDiedPanel()
     {
+        if (gameEnded)
+            return;
+
         gameEnded = true;
 
         gamePanel.SetActive(false);
@@ -424,7 +460,88 @@ public class UIManager : MonoBehaviour
 
         HidePowerBar();
 
+        StopBackgroundMusic();
+
+        // You Died audio - faqat bir marta
+        PlayYouDiedSound();
+
         Time.timeScale = 0f;
+    }
+
+
+    // =========================================================
+    // BUTTON CLICK SOUND
+    // =========================================================
+
+    public void PlayButtonClick()
+    {
+        if (soundEffectSource == null)
+            return;
+
+        if (buttonClickSound == null)
+            return;
+
+        soundEffectSource.PlayOneShot(buttonClickSound);
+    }
+
+
+    // =========================================================
+    // YOU WIN SOUND
+    // =========================================================
+
+    private void PlayYouWinSound()
+    {
+        if (soundEffectSource == null)
+            return;
+
+        if (youWinSound == null)
+            return;
+
+        soundEffectSource.PlayOneShot(youWinSound);
+    }
+
+
+    // =========================================================
+    // YOU DIED SOUND
+    // =========================================================
+
+    private void PlayYouDiedSound()
+    {
+        if (soundEffectSource == null)
+            return;
+
+        if (youDiedSound == null)
+            return;
+
+        soundEffectSource.PlayOneShot(youDiedSound);
+    }
+
+
+    // =========================================================
+    // BACKGROUND MUSIC
+    // =========================================================
+
+    private void PlayBackgroundMusic()
+    {
+        if (backgroundMusicSource == null)
+            return;
+
+        if (backgroundMusicSource.mute)
+            return;
+
+        if (!backgroundMusicSource.isPlaying)
+        {
+            backgroundMusicSource.Play();
+        }
+    }
+
+
+    private void StopBackgroundMusic()
+    {
+        if (backgroundMusicSource == null)
+            return;
+
+        backgroundMusicSource.Stop();
     }
 
 
@@ -434,13 +551,25 @@ public class UIManager : MonoBehaviour
 
     public void TurnMusicOn()
     {
-        AudioListener.pause = false;
+        PlayButtonClick();
+
+        if (backgroundMusicSource != null)
+        {
+            backgroundMusicSource.mute = false;
+        }
 
         PlayerPrefs.SetInt("MusicMuted", 0);
         PlayerPrefs.Save();
 
         musicOnButton.SetActive(true);
         musicOffButton.SetActive(false);
+
+        // Faqat GamePanel ochiq bo'lsa music boshlanadi
+        if (gamePanel.activeSelf &&
+            Time.timeScale > 0f)
+        {
+            PlayBackgroundMusic();
+        }
     }
 
 
@@ -450,7 +579,13 @@ public class UIManager : MonoBehaviour
 
     public void TurnMusicOff()
     {
-        AudioListener.pause = true;
+        PlayButtonClick();
+
+        if (backgroundMusicSource != null)
+        {
+            backgroundMusicSource.mute = true;
+            backgroundMusicSource.Stop();
+        }
 
         PlayerPrefs.SetInt("MusicMuted", 1);
         PlayerPrefs.Save();
@@ -469,17 +604,19 @@ public class UIManager : MonoBehaviour
         int muted =
             PlayerPrefs.GetInt("MusicMuted", 0);
 
+        if (backgroundMusicSource != null)
+        {
+            backgroundMusicSource.mute =
+                muted == 1;
+        }
+
         if (muted == 1)
         {
-            AudioListener.pause = true;
-
             musicOnButton.SetActive(false);
             musicOffButton.SetActive(true);
         }
         else
         {
-            AudioListener.pause = false;
-
             musicOnButton.SetActive(true);
             musicOffButton.SetActive(false);
         }
