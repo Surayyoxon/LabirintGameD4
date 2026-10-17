@@ -3,11 +3,15 @@ using System.Collections;
 
 public class PlayerPowerPallet : MonoBehaviour
 {
-    [Header("Power Pellet Settings")]
+    [Header("Power Settings")]
     [SerializeField] private float powerDuration = 15f;
 
     private bool isPoweredUp = false;
+
+    private float powerEndTime;
+
     private Coroutine powerCoroutine;
+
 
     private void OnTriggerEnter(Collider other)
     {
@@ -19,6 +23,7 @@ public class PlayerPowerPallet : MonoBehaviour
         Destroy(other.gameObject);
     }
 
+
     private void ActivatePower()
     {
         if (powerCoroutine != null)
@@ -29,9 +34,13 @@ public class PlayerPowerPallet : MonoBehaviour
         powerCoroutine = StartCoroutine(PowerMode());
     }
 
+
     private IEnumerator PowerMode()
     {
         isPoweredUp = true;
+
+        powerEndTime =
+            Time.time + powerDuration;
 
         Debug.Log("POWER MODE ON!");
 
@@ -39,13 +48,34 @@ public class PlayerPowerPallet : MonoBehaviour
 
         isPoweredUp = false;
 
+        powerEndTime = 0f;
+
         Debug.Log("POWER MODE OFF!");
 
         powerCoroutine = null;
     }
 
+
     public bool IsPoweredUp()
     {
         return isPoweredUp;
+    }
+
+
+    public float GetRemainingPowerTime()
+    {
+        if (!isPoweredUp)
+            return 0f;
+
+        return Mathf.Max(
+            0f,
+            powerEndTime - Time.time
+        );
+    }
+
+
+    public float GetPowerDuration()
+    {
+        return powerDuration;
     }
 }

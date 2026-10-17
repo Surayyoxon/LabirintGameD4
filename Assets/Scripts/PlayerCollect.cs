@@ -2,39 +2,78 @@ using UnityEngine;
 
 public class PlayerCollect : MonoBehaviour
 {
-    private int score = 0;
+    private int allScore = 0;
+    private int simpleScore = 0;
+    private int bonusScore = 0;
 
     [Header("Collectible Tags")]
     [SerializeField] private string normalCollectibleTag = "Collectible";
     [SerializeField] private string specialCollectibleTag = "SpecialCollectible";
 
+
     private void OnTriggerEnter(Collider other)
     {
-        // Oddiy collectible = +1
+        // ==========================================
+        // ODDIY COLLECTIBLE
+        // ==========================================
+
         if (other.CompareTag(normalCollectibleTag))
         {
-            score += 1;
+            allScore += 1;
+            simpleScore += 1;
 
-            Debug.Log("Oddiy collectible olindi! +1 Score");
-            Debug.Log("Current Score: " + score);
+            Debug.Log("Oddiy collectible olindi! +1");
+            Debug.Log("All Score: " + allScore);
+            Debug.Log("Simple Score: " + simpleScore);
 
             Destroy(other.gameObject);
         }
 
-        // Maxsus collectible = +5
+
+        // ==========================================
+        // BONUS COLLECTIBLE
+        // ==========================================
+
         else if (other.CompareTag(specialCollectibleTag))
         {
-            score += 5;
+            allScore += 5;
+            bonusScore += 1;
 
-            Debug.Log("Maxsus collectible olindi! +5 Score");
-            Debug.Log("Current Score: " + score);
+            Debug.Log("Bonus collectible olindi! +5");
+            Debug.Log("All Score: " + allScore);
+            Debug.Log("Bonus Score: " + bonusScore);
 
             Destroy(other.gameObject);
         }
     }
 
+
+    // ==========================================
+    // GET ALL SCORE
+    // ==========================================
+
     public int GetScore()
     {
-        return score;
+        return allScore;
+    }
+
+
+    // ==========================================
+    // GET SIMPLE SCORE
+    // ==========================================
+
+    public int GetSimpleScore()
+    {
+        return simpleScore;
+    }
+
+
+    // ==========================================
+    // GET BONUS SCORE
+    // ==========================================
+
+    public int GetBonusScore()
+    {
+        return bonusScore;
     }
 }
